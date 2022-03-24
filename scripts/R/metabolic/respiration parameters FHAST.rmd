@@ -1,0 +1,478 @@
+
+##### Fish respiration parameters (fishRespParam) #####
+
+This code is intended to estimate parameter values for a respiration equation based on the Wisconsin model. 
+Once estimated, the parameters allow for estimation of a fish's metabolic rate based on swim speed, mass, and temperature.
+
+Equation:
+
+metabolic rate (mJ/day) = A*m^B * exp(C*t) * exp(D*v)
+
+where m = mass (g)
+t = temperature (c)
+and v = swim speed (in cm/s)
+
+
+The parameters to be calculated are as follows (descriptions from inSTREAM manual): 
+
+A:"Multiplier in allometric term for resp-mass-term (J/d/g)"
+
+
+B:"Exponent in allometric term for resp-mass term (unitless)"
+
+C:"Parameter in the temperature function (°C-2)"
+
+D:"Parameter in the activity function (unitless)"
+
+
+
+
+
+
+The first section of this code loads in the required packages and the desired dataset. Data is read from an excel file (respiration_data.xlsx), which is divided into separate sheets for each species. Just paste the directory location of "respiration_data.xlsx" into setwd(). Data is then checked for data flags and cleaned if necessary. 
+
+```{r}
+
+setwd("C://Users/jesse/OneDrive/Documents/UCSC-DESKTOP-OD7AB1S/data sources/FHAST Data/respiration/")
+
+library(tidyverse)
+library(lubridate)
+library(openxlsx)
+library(viridis)
+library(broom)
+library(visreg)
+
+
+#loading dataset and the specific sheet
+#Edit sheet name below to select species:
+  #"Green sturgeon"
+  #"Chinook"
+  #"Steelhead"
+  #"Multiple sturgeon" (this sheet includes data for green sturgeon and other species like white sturgeon)
+
+
+metData = read.xlsx(xlsxFile = "respiration_data.xlsx",
+                          sheet = "Green sturgeon",
+                          na.strings = "NA") 
+
+
+#-9999 used in master datasheet to denote missing values
+    #script below should turn them all into NA's
+
+
+metData[metData==-9999]<-NA 
+
+
+#mutate step adds a column for metajoules of energy used per day
+
+ metData= metData %>%
+  mutate(met_j_per_day = mr_mgo2_per_h*24*19.3*22.4/32)
+
+
+#omitting data flags
+    #data flag of 1 = good data
+    #data flag of 2 = somewhat questionable or less desirable data, ie fish were cannulated
+    #data flag of 3 = don't use for MR parameter calculation! Data includes effects of an experimental treatment or is otherwise considered very suspect. See notes column for reasoning of dataflags
+
+#this step removes all data with flag of 3 
+         metData<- subset(metData, metData$data_quality!=3)
+          
+
+         
+#####Choosing life stage  
+         #remove the hash for one of the options below to select the desired life stage
+         
+#selecting just juveniles and larvae (omitting adults)
+
+        # metData<- subset(metData, metData$life_stage!="adult")
+
+#selecting only adults
+
+        # metData<- subset(metData, metData$life_stage=="adult")
+
+  
+#selecting only juveniles
+
+         metData<- subset(metData, metData$life_stage=="juvenile")
+         
+#selecting only larvae         
+         
+         # metData<- subset(metData, metData$life_stage=="larval")
+
+
+``` 
+         
+         
+The following chunk builds the fitting equation and attempts to fit the model to the data and estimate parameter values for A, B, C and D (coefficients in the respiration equation). The most effective fitting method so far appears to be to weight by 1/mr^2, which places more statistical emphasis on the younger fish and making a generally better fit overall. This can be changed by adding another variable in for weights = ..., such as n (number of observations).      
+
+This chunk also spits out a few very basic plots of MR vs. temp, MR vs. swim speed, and MR vs. temperature.
+         
+         
+```{r}         
+         
+         
+# Build the fitting function 
+metEqun = function(m, v, t, A, B, C, D) {
+  A*m^B*exp(C*t)*exp(D*v)
+}
+# fit the fitting function
+metModel = nls(met_j_per_day ~ metEqun(mass_g, swimspeed_bodylengths_per_second, temperature_c, A, B, C, D),
+                data = metData,
+              # weights = n,
+                weights = 1/met_j_per_day^2,
+                start = list(A = 70, B = 0.8, C = 0.01 , D = 0.01), 
+                trace = T)
+
+
+
+###test plots of mass vs. MR
+          
+with(metData, plot(ln_mr_mgo2_per_h~mass_g))
+with(metData, plot(ln_mr_mgo2_per_h~temperature_c))
+with(metData, plot(ln_mr_mgo2_per_h~swimspeed_bodylengths_per_second))
+
+
+
+
+
+
+```
+The following chunk creates new variables for each parameter to feed into visreg, which makes effects plots for each independent variable while keeping the other independent variables at their median. Useful for seeing the overall effect of temperature, mass, and swim speed when the others are held constant. This chunk also generates model prediction values and adds them to the main dataframe for comparing with the actual data later on.
+
+
+```{r}
+library(car)
+library(rgl)
+
+#model diagnostics and recording parameters of MR equation
+summary(metModel)
+
+plot(resid(metModel)~fitted(metModel))
+abline(a = 0, b = 0)
+
+fishRespParamA = coef(metModel)[[1]]
+fishRespParamB = coef(metModel)[[2]]
+fishRespParamC = coef(metModel)[[3]]
+fishRespParamD = coef(metModel)[[4]]
+
+A<-fishRespParamA
+B<-fishRespParamB
+C<-fishRespParamC
+D<-fishRespParamD
+
+
+
+#visualize model effects when other variables are held at their median value
+  
+  visreg(metModel, xvar = "temperature_c", band = T, gg = T)
+  visreg(metModel, xvar = "swimspeed_bodylengths_per_second", band = T, gg = T)
+  visreg(metModel, xvar = "mass_g", band = T, gg = T)
+
+#makes 3d models of model effects
+
+  visreg2d(metModel, x="temperature_c", y="mass_g", plot.type="rgl")
+  visreg2d(metModel, x="temperature_c", y="swimspeed_bodylengths_per_second", plot.type="rgl")
+  visreg2d(metModel, x="mass_g", y="swimspeed_bodylengths_per_second", plot.type="rgl")
+
+                  
+#create column for model predictions based on our data
+
+metData = metData   %>%
+
+  mutate(predictions = predict(metModel, newdata= metData, type = "response"))
+
+
+```
+
+This chunk contains various ggplots made to look more in depth at the data and compare with predictions, colored by author or temperature etc. These can be edited to highlight the desired variables/color scheme.
+
+
+
+```{r} 
+
+#simple plot of observed vs predicted MR and 1:1 line
+
+  with(metData, plot(met_j_per_day~predictions))
+   abline(a = 0, b= 1)
+  
+  
+##plotting MR vs. model predictions  
+  
+      predictions_MR_plot = ggplot(metData, aes(x = log(predictions), y = log(met_j_per_day), colour = author,  size = n)) +
+      
+  #theme_classic(base_size = 30) + 
+  labs(y = "log metabolic rate (J/day)", x = "log model predictions") +
+      ggtitle("Green sturgeon", subtitle = "Juveniles")+
+      geom_point(alpha=.8) +  
+      geom_abline(intercept = 0, slope = 1, color="black", 
+                 linetype="dashed", size=1)
+predictions_MR_plot
+
+
+
+#plotting mass vs. MR
+
+    mass_MR_plot = ggplot(metData, aes(x = (log(mass_g)), y = log(met_j_per_day), colour = author)) +
+  #theme_classic(base_size = 30) + 
+  labs(y = "Log metabolic rate (J/day)", x = "Log mass (g)") +
+      ggtitle("Green sturgeon", subtitle = "Juveniles")+
+  geom_point() 
+      
+ #   mass_MR_plot  + scale_color_gradient2(midpoint= median((temperature_c)), low="black", mid="blue",
+  #                   high="orange", space ="Lab" )  
+
+   mass_MR_plot
+  
+
+  
+#plotting temperature vs. MR
+
+    temp_MR_plot = ggplot(metData, aes(x = (temperature_c), y = log(met_j_per_day), colour = author, size = mass_g)) +
+  #theme_classic(base_size = 30) + 
+  labs(y = "Log metabolic rate (J/day)", x = "temperature (C)?") +
+      ggtitle("Green sturgeon", subtitle = "Juveniles")+
+  geom_point() 
+      
+    temp_MR_plot  
+    
+    
+    
+ #plotting swim speed vs MR   
+    
+    speed_MR_plot = ggplot(metData, aes(x = swimspeed_bodylengths_per_second, y = log(met_j_per_day), colour = author, size = mass_g, shape = life_stage)) +
+  #theme_classic(base_size = 30) + 
+  labs(y = "Log metabolic rate (J/day)", x = "swim speed (body lengths/s)") +
+      ggtitle("Green sturgeon", subtitle = "Juveniles") + 
+  geom_point(alpha=.8) 
+    
+    
+  speed_MR_plot
+
+   
+
+
+```    
+
+
+
+Further model diagnostics: this chunk creates preview plots of the data (black circles), overlaid with the model's predictions (red +'s). This is useful for seeing where the model predictions do not match the actual data, ie if they underestimate MR at high temperature, etc.
+
+```{r}
+library(nlstools)
+
+metEqun = function(m, v, t, A, B, C, D) {
+  A*m^B*exp(C*t)*exp(D*v)
+}
+#above is the equation we're fitting. nlstools wants it in formula format, shown below:
+
+metForm <- as.formula(met_j_per_day ~ A*mass_g^B*exp(C*temperature_c)*exp(D*swimspeed_bodylengths_per_second))
+
+#taking this formula and previewing 
+  #variable is the column index of whichever independent variable you want on the preview's x axis
+  #should show good agreement between model predictions and actual data (red dots on black dots)
+    #RSS value is provided in the console as well
+
+
+ #mass preview, you can mess around with parameter values and see the effect here
+preview(metForm, data = metData, start = list(A = fishRespParamA, B = fishRespParamB, C = fishRespParamC, D = fishRespParamD), variable = grep("^mass_g$", colnames(metData))
+) 
+
+
+#temperature preview
+preview(metForm, data = metData, start = list(A = fishRespParamA, B = fishRespParamB, C = fishRespParamC, D = fishRespParamD), variable = grep("^temperature_c$", colnames(metData))
+) 
+
+
+
+#swim speed preview
+preview(metForm, data = metData, start = list(A = fishRespParamA, B = fishRespParamB, C = fishRespParamC, D = fishRespParamD), variable = grep("^swimspeed_bodylengths_per_second$", colnames(metData))   
+) 
+
+
+
+```
+
+From here on, there are model diagnostic tools from nlstools(). The next bit creates an overview of the model using nlstools, which is essentially a more detailed summary(). Here is a description of the overview from their README:
+
+"Specifcally, overview() returns output containing:
+1. The parameter estimates with the corresponding estimated standard errors, t-test statistics
+(estimate/standard error) for evaluating null hypotheses that the model parameters
+could be equal to 0 (H0 : theta = 0) along with the corresponding p values calculated using
+a t distribution as reference distribution (for the present example the t distribution with
+33 degrees of freedom was used). The residual sum of squares RSSmin = 81200 and the
+residual standard error (sqrt(RSSmin/33 = 49.6) are also reported, refecting the variation
+within the walk test that is due to the device used. The number of steps needed for
+finding the parameters is also reported (numbers > 10 - ????20 are often indicative of poor
+starting values and/or too complex model equation in view of the sample size). This
+output is similar to the one from the summary() method available for nls() ts (Ritz
+and Streibig 2008, p. 12).
+
+2. The corresponding 95% t-based confidence intervals (in this case percentiles from the
+t distribution with 33 degrees of freedom), similar to the intervals obtained using the
+default confint2() method in the package nlrwr (Ritz 2011). Accordingly reported
+p values and confidence intervals are in agreement. We refer to Huet et al. (2003,
+pp. 32-33) for a detailed derivation.
+
+3. The estimated correlation matrix is reported. This piece of output allows assessment
+of the degree of correlation between the parameter estimates in order to detect highly
+correlated parameters that may indicate redundancies and perhaps point towards simplification of the model equation. In our example, the highest correlation (between mu and
+VO2peak) is 0.76, which does not indicate any problems, but merely is a consequence
+of these two parameters being entangled in the same term in Equation 2."
+
+
+```{r}
+#overview of model fit
+
+  overview(metModel)
+
+
+```
+
+
+This chunk also produces a classic 4x4 residual plot from nlstools to visualize fit and plotting residuals. From the nlstools README:
+
+"Top left panel: The plot of raw residuals against fitted values is useful for assessing
+whether or not the chosen model equation is appropriate (the scatter is similar above
+and below the horizontal axis along the range of fitted values in case of an appropriate
+model equation). This plot is similar to the one obtained for linear models by using
+plot(lmFit, which = 1).
+
+Top right panel: The plot of the standardized residuals vs. the fitted values is useful for
+evaluation if there is any indication of variance inhomogeneity, which would show up as
+an uneven spread across the range of the fitted values.
+
+Bottom left panel: The plot of each raw residual vs. the previous raw residual (lag
+one) may be useful to detect correlation along the scale of the independent variable
+(to be meaningful it requires the data to be order in increasing order according to the
+independent variable). A systematic departure away from a random scatter around the
+x axis is indicative of correlation among the values of the dependent variable. This may
+often be the case if the independent variable corresponds to some kind of time scale.
+For more details we refer to Glasbey (1979) and Ritz and Streibig (2008, pp. 69{70).
+
+Bottom right panel: The normal probability plot (or QQ plot) compares the standardized
+residuals vs. the theoretical values from a standard normal distribution, both of
+which are expected to range from ????2 to 2 for most of the values. This functionality is
+similar to what is available for linear models, e.g., using plot(lmFit, which = 2).". For the QQ plot, you should see values normally distributed and aligned across the diagonal axis."
+
+
+```{r}
+
+
+ 
+ metModel_resids <- nlsResiduals(metModel)
+ 
+       
+plot(metModel_resids)
+
+
+```
+
+
+Testing for autocorrelation. This function performs a Shapiro-Wilk normality test. If p < .05, this means the null hypothesis that the data is normally distributed CAN be rejected. We want p > .05
+
+This function also performs a Runs test, which indicates autocorrelation issues for p < .05.
+
+```{r}
+
+test.nlsResiduals(metModel_resids)
+
+
+```
+
+
+
+Resampling techniques from nlstools() to estimate resampled parameter values and point out which observations are strongly influencing parameter values. This runs through a jackknife procedure, followed by a bootstrapping procedure, and returns plots of each. From nlstools:
+
+"Both jackknife and bootstrap procedures applied to nonlinear regression are implemented
+in nlstools. Jackknife is implemented via the function nlsJack(). By using a leave-oneout
+procedure, it produces jackknife parameter estimates together with condence intervals
+(Quenouille 1956; Fox, Hinkley, and Larntz 1980; Seber and Wild 1989). It can also be used
+to assess the influence of each observation on each parameter estimate.
+
+The function nlsBoot() uses non-parametric bootstrap of mean centered residuals to obtain
+a given number (argument niter) of bootstrap estimates (Venables and Ripley 2002, Chapter
+8). Bootstrap estimates, standard errors together with median and percentile condence
+intervals (2.5% and 97.5% percentiles of bootstrapped estimates) (Venables and Ripley 2002,
+pp. 225{226) are displayed by the summary() method. The associated plotting function can
+be used both for a pairwise representation of the bootstrap estimates or, as shown in Figure 6
+(right panel), for a boxplot representation of the distribution of each bootstrapped parameter.
+
+"In some cases, problems of convergence may arise during the bootstrap resampling procedure,
+when the model cannot be tted to the resampled data. If the tting procedure fails less than
+50% of cases, the bootstrap statistic is provided with a warning indicating the percentage of
+times the procedure successfully converged; otherwise the procedure is interrupted with an
+error message and no result is given.
+The comparison of condence intervals based on the t-based approximation, previously obtained
+using overview(), and based on resampling procedures (jackknife or bootstrap) is
+illustrated in Figure 7. In that case, it shows that bootstrap condence intervals are comparable
+to the t-based ones, providing slightly narrower condence intervals for all three
+parameters. On the other hand, jackknife condence intervals noticeably dier from the
+other two intervals. This was to be expected considering that jackknife is using only limited
+information about the statistic and is therefore less ecient than bootstrap (Efron 1979). In
+addition, jackknife is resampling sequentially individuals whereas bootstrap resamples residuals
+with replacement. Therefore, we tentatively recommend to use the bootstrap procedure
+for the assessment of condence intervals of parameter estimates, whereas the jackknife procedure
+should be specically used for the detection of in
+uential observations. It is worth
+noting that function confint() from the default R package stats can also be used to build
+condence intervals by proling the residual sum of squares. However, this method often
+fails to give any result due to the lack of convergence of the optimization algorithm for at
+least one explored value of one of the parameters. Unlike the function confint(), nlsBoot()
+provides condence intervals even if the optimization algorithm fails to converge for some of
+the bootstrapped samples." 
+
+
+```{r}
+
+
+metModel_jack <- nlsJack(metModel)
+summary(metModel_jack)
+
+plot(metModel_jack)
+
+
+metModel_boot<-nlsBoot(metModel)
+summary(metModel_boot)
+
+
+plot(metModel_boot, type = "boxplot")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+this is scratch space for investigating specific studies for outliers, etc.
+
+
+```{r}
+
+
+
+#galdata<-subset(metData, subset = metData$author=="Gallaugher et al.")
+
+#ggplot(data = galdata, aes(x = predictions, y = met_j_per_day, color = swimspeed_bodylengths_per_second, size = mass_g)) + geom_point() +geom_abline(slope = 1, intercept = 0)
+  
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+

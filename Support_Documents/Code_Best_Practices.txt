@@ -1,0 +1,72 @@
+Data Tables
+- Articles are designated with three fields (first author last name, year, journal)
+- Journal abbreviations (https://www.library.caltech.edu/journal-title-abbreviations)
+- all lower case headers and variables "velocity_mps"
+- Top row should be headers with labels.	
+	If labels aren't clear, include a ReadMe 
+- Each row under that is a single record. 
+- Each column is a single variable. 
+- Every column should be consistent.
+	All numbers should have the same number of decimal places. All dates should be formatted consistently. All Text fields should use controlled vocabulary. All coded values should be consistent. Etc. 
+- Don't use color or comments to add meaning
+- Don't leave cells empty 
+- Put notes in a separate file
+
+Model Development
+Conduct basic analytical tests of modelling framework before implementing the ABM
+
+R
+End product should be functions	
+Look at tidyverse linter https://style.tidyverse.org/syntax.html
+Code should be highly commented. 
+All lower case headers, functions, and variables "velocity_mps"
+Functions start with verbs
+Each significant action needs to be called out with a comment
+The code should be foldable (see coding template) 
+Use “modern R” (tidyverse and associated packages) whenever possible
+
+NetLogo
+Code should be highly commented. 
+All lower case headers and variables "velocity_mps"
+Each significant action needs to be called out with a commnet
+Consider and address bottlenecks
+
+File Structure
+data (stuff that would be model inputs)
+	GIS
+	tabular
+temporary 
+	NetLogo
+	R
+outputs
+	data
+	figures
+	report		
+scripts
+	NetLogo
+		predation
+		feeding
+	R
+		predation
+		feeding
+			R
+			data_raw (for cal or fitting of feeding)
+			data (just feeding parameters)
+
+make package if we have several models using fame functions.
+
+References
+       guides.github.com/activities/hello-world/
+       product.hubspot.com/blog/git-and-github-tutorial-for-beginners
+       https://www.youtube.com/playlist?list=PL-osiE80TeTuRUfjRe54Eea17-YfnOOAx
+https://www.pipinghotdata.com/posts/2020-10-25-your-first-r-package-in-1-hour/
+https://r-pkgs.org/package-structure-state.html
+
+Memos
+
+USACE Reports
+
+Presentations
+
+Papers
+

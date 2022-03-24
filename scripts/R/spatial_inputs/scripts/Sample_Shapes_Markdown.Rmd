@@ -1,0 +1,146 @@
+---
+title: "Shape_Aggerator"
+author: "Peter Dudley"
+date: "9/28/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+```
+
+# Sample all shape files into the grid
+
+This script takes multiple shape files and prints out the csv with the grid 
+
+Start with the grid  
+```{r}
+#____________________________________________________________________#
+##### Options #####
+# What resolution is the grid you are using
+resolution = 100
+# what is the max buffer distance of the grid
+max_buffer = 500
+# Do you want the plots to show up
+show_plots = 1
+# select the number of computer cores to use in analysis
+number_cores = 8
+# Location of grid
+grid_folder = "../../../temporary/R/"
+# Location of the shape folder
+shape_folder = "../../../data/GIS/example_shapes_1/"
+# Where to save the output
+output_folder = "../../../temporary/NetLogo/"
+#____________________________________________________________________#
+```
+
+Load the necessary libraries and functions
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+# the simple features library for most of the shape file stuff
+library(sf)
+# leaflet for plotting shapefiles
+library(leaflet)
+# you know why
+library(tidyverse)
+# deal with most of the rater calculations
+library(raster)
+# to smooth the center line of the river
+library(smoothr)
+# the viridis color map
+library(viridis)
+# a faster way to do raster sampling with shape files
+library(exactextractr)
+# Library to parallelize purrr
+library(furrr)
+# Library to join graphs
+library(patchwork)
+
+# Make sure dplyr select is the default
+select = dplyr::select
+
+# Setup furrr
+future::plan(multisession, workers = number_cores)
+future.seed = TRUE
+
+# Load the function to sample shapes on the grid
+source("./scripts/Sample_Shapes_Functions.R")
+```
+
+Load the necessary data
+```{r}
+# load the river grid
+river_grid = readRDS(paste0(grid_folder, "river_grid_", resolution, "_", max_buffer, ".rds"))
+# Load the cover file
+cover_shape = st_read(paste0(shape_folder, "ted_layer_32610.shp"), quiet = TRUE) 
+# Load the zone file
+zone_shape = st_read(paste0(shape_folder, "River_Zones.shp"), quiet = TRUE) 
+# Load the river bank file
+riverbank_shape = st_read(paste0(shape_folder, "River_Lines.shp"), quiet = TRUE) 
+```
+
+Make a list of the shape files and variabels 
+```{r}
+variables = list("Cover", "Zones", "Value")
+shape_files = list(cover_shape, zone_shape, riverbank_shape)
+```
+
+
+Run the function and reduce the results to get one shapefile
+```{r}
+sampeled_shapes = sample_all_shapes(river_grid, shape_files, variables)
+```
+
+Convert the sampe file to CSV file
+```{r}
+shapes_csv = sampeled_to_csv(sampeled_shapes) 
+```
+
+Show shape sample 1 
+```{r, fig.show="hold"}
+if(show_plots){
+
+ggplot(data = sampeled_shapes) +
+    theme_classic() +
+    geom_sf(aes(fill = Value), color = NA) +
+    scale_fill_viridis()
+}
+```
+
+Show shape sample 2 
+```{r, fig.show="hold"}
+if(show_plots){
+
+ggplot(data = sampeled_shapes) +
+    theme_classic() +
+    geom_sf(aes(fill = Cover), color = NA) +
+    scale_fill_viridis()
+}
+```
+
+Show gridded nature of the sampeling by zooming in
+```{r, fig.show="hold"}
+if(show_plots){
+
+ggplot(data = sampeled_shapes) +
+    theme_classic() +
+    geom_sf(aes(fill = Cover), color = NA) +
+    xlim(554000, 554200)+
+    ylim(4484700, 4485000)+
+    scale_fill_viridis()
+}
+```
+
+Show shape sample 3 
+```{r, fig.show="hold"}
+if(show_plots){
+
+ggplot(data = sampeled_shapes) +
+    theme_classic() +
+    geom_sf(aes(fill = Zones), color = NA) +
+    scale_fill_viridis()
+}
+```
+

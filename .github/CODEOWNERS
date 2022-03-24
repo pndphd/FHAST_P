@@ -1,0 +1,30 @@
+# This is a comment.
+# Each line is a file pattern followed by 1 or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @global-owner1 and @global-owner2 will be requested for
+# review when someone opens a pull request.
+*       @pndphd
+
+# Specific ownership for all folders
+ 
+/Bank_Veg_Growth/ @allicramer
+/Cover/ @mrguyperson
+/Daily_Movement/ @allicramer
+/Data/ @jesseblack42
+/Default_Input/ @mrguyperson
+/Feeding_Model/ @kwanmokkim
+/Food_Production/ @kwanmokkim
+/Incubation/ @pndphd
+/Metabolic/ @jesseblack42
+/Migration/ @mrguyperson
+/Non_Spatial_Inputs/ @mrguyperson
+/Predation/ @mrguyperson
+/River_Linear/ @pndphd
+/Shade_Model/ @allicramer
+/Spatial_Inputs/ @pndphd
+/Spawning/ @pndphd
+/Stranding/ @kwanmokkim
+/Substrate/ @kwanmokkim
+/Temp_Risk/ @jesseblack42

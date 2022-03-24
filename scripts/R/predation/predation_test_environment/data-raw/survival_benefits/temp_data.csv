@@ -1,0 +1,51 @@
+author,year,journal,species,variable,x,x_unit,experiment,y,y_unit
+Myrick,2000,Enviro Bio Fish,Sac Pikeminnow,Temp,10.0098360655737,C,Ucrit,0.389802631578947,m/s
+Myrick,2000,Enviro Bio Fish,Sac Pikeminnow,Temp,14.9868852459016,C,Ucrit,0.568421052631578,m/s
+Myrick,2000,Enviro Bio Fish,Sac Pikeminnow,Temp,19.9819672131147,C,Ucrit,0.499342105263157,m/s
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,5.91501955496906,C,Dig Eff,0.020798789408761,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,5.9133939585186,C,Dig Eff,0.026358329269342,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,5.93921225508476,C,Dig Eff,0.050559755013053,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,9.86005527027931,C,Dig Eff,0.028776643047707,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,9.94468190902397,C,Dig Eff,0.076853538540979,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,9.83624506344607,C,Dig Eff,0.110207550417395,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,15.0077454889698,C,Dig Eff,0.198676095126079,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,14.9385142048442,C,Dig Eff,0.210447086835537,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,14.901029863163,C,Dig Eff,0.226143535385409,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,19.9162817828011,C,Dig Eff,0.286481970222897,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,19.9082494238694,C,Dig Eff,0.313952637769299,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,23.4394274075561,C,Dig Eff,0.387323933560916,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,23.540405634126,C,Dig Eff,0.379478398691872,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,19.8533616378362,C,Dig Eff,0.38916886600304,NA
+Steigenberger,1973,J. Fish Re. B. Can.,N Pikeminnow,Temp,23.8799640456314,C,Dig Eff,0.455688631343412,NA
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,10.1548053045913,C,Met,194.426732540609,mg/kg/h
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,14.8858773181169,C,Met,244.679034193924,mg/kg/h
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,20.2476620700586,C,Met,318.360970523191,mg/kg/h
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,24.5844560680509,C,Met,393.284186750614,mg/kg/h
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,29.9462408199926,C,Met,511.71664870197,mg/kg/h
+Beamish,1970,Can J Zoo,Largemouth B.,Temp,33.8206002007713,C,Met,459.092013610482,mg/kg/h
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,13.9596671056901,C,Digest Rate,0.039100499680936,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,17.0828990818683,C,Digest Rate,0.040876533191848,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,20.0609860848651,C,Digest Rate,0.059626120358515,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,20.0662543663746,C,Digest Rate,0.054884890390509,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,23.0254442726526,C,Digest Rate,0.06522940920127,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,26.0694229704708,C,Digest Rate,0.080485163193351,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,28.0667888297161,C,Digest Rate,0.085468175181291,h^-1
+Adams,1982,Can J Fish Aq Sci,Striped B.,Temp,26.0256924163469,C,Digest Rate,0.072822173725692,h^-1
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,5,C,Cruising speed,19,ft/s
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,12,C,Cruising speed,44,ft/s
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,17,C,Cruising speed,48,ft/s
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,22,C,Cruising speed,82,ft/s
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,29,C,Cruising speed,80,ft/s
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,5,C,feeding rate,0.010394579909886,worms/fish/day
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,11.9515306122449,C,feeding rate,1.60399549430162,worms/fish/day
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,16.9897959183673,C,feeding rate,2.30846640604294,worms/fish/day
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,19.9234693877551,C,feeding rate,4.104699509674,worms/fish/day
+Coutant,1975,Nat. Symp. Centr.,Largemouth B.,Temp,26.9387755102041,C,feeding rate,4.31830605618871,worms/fish/day
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,4,C,feeding rate,2.01378555775156,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,6,C,feeding rate,3.45130559957209,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,8,C,feeding rate,2.35717378185871,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,10,C,feeding rate,19.914785691719,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,12,C,feeding rate,63.0867337983742,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,14,C,feeding rate,131.609217738417,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,16,C,feeding rate,159.981808744841,worms/day/100mg
+Lemons&Crenshaw,1985,Physiological Zoology,Largemouth B.,Temp,18,C,feeding rate,242.320954253151,worms/day/100mg

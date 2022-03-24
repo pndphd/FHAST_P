@@ -1,0 +1,134 @@
+---
+title: "Make Linear River Grid"
+author: "Peter Dudley"
+date: "9/23/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+```
+# Make a Linear River Grid
+
+This script takes 2 shape files, a point at the top of the river and a center line,  and makes a grid along the river.
+
+Start with some inputs for the script. They are the default projection, the resolution, the max distance to make the grid out from the center line, and the 2 input shape files
+```{r}
+#____________________________________________________________________#
+##### Inputs #####
+# Set the desired EPGS code for the GIS files
+EPSG = 32610
+# Set the resolution you want
+# This is how often a point is placed on the river line in m
+# and how spaced the buffers are
+resolution = 20
+# Maximum lateral distance
+# what is the max distance away from the center line 
+# you want the lateral grid to extend in m
+max_buffer = 500
+# the paths and names of the input files
+center_line = "../../../data/GIS/center_line_1/Center_Line.shp"
+top_marker = "../../../data/GIS/top_point_1/Top_Point.shp"
+#____________________________________________________________________#
+```
+
+Load the necessary libraries 
+```{r message=FALSE, warning=FALSE}
+# the simple features library for most of the shape file stuff
+library(sf)
+# leaflet for plotting shapefiles
+library(leaflet)
+# you know why
+library(tidyverse)
+# deal with most of the rater calculations
+library(raster)
+# to smooth the center line of the river
+library(smoothr)
+# the viridis color map
+library(viridis)
+# a faster way to do raster sampling with shape files
+library(exactextractr)
+
+# Make sure slects is the dplyr function
+select = dplyr::select
+```
+
+Load Functions
+This is a list of functions used to do the calculations as well as plot
+```{r}
+source("./scripts/Grid_Maker_Functions.R")
+source("./scripts/Map_Maker_Functions.R")
+```
+
+Load the necessary data and do some pre processing of making a list of lateral distances for the grid
+```{r}
+shape_files = load_input_files(line = center_line ,
+                             top = top_marker,
+                             EPGS = EPSG)
+
+distances_list = make_distances_list(resolution = resolution,
+                                     buffer = max_buffer)
+```
+
+Display in the input files
+```{r fig.align='center'}
+make_leaflet_map(shape_files$line, 
+                 type = "line")
+
+make_leaflet_map(shape_files$top, 
+                 type = "point")
+
+```
+
+First make a series of buffers which are the lateral grid dividers
+```{r fig.align='center'}
+buffers = make_buffers(distances = distances_list,
+                       line = shape_files$line)
+
+make_leaflet_map(buffers, 
+                 type = "poly")
+```
+
+Make a shape used to tell left form right
+```{r fig.align='center'}
+large_buffer = make_large_buffer(distances = distances_list,
+                                 line = shape_files$line)
+
+make_leaflet_map(large_buffer, 
+                 type = "poly")
+```
+
+Place sample points along the line
+```{r fig.align='center'}
+sample_points = make_sample_points(resolution = resolution,
+                                   line = shape_files$line)
+
+make_leaflet_map(sample_points, 
+                 type = "point")
+```
+
+Make the Voronoi cells
+```{r fig.align='center'}
+vor_cells = make_vor_cells(points = sample_points,
+                           top = shape_files$top,
+                           resolution = resolution)
+
+make_leaflet_map(vor_cells, 
+                 type = "poly")
+```
+
+Combine the buffers and Voronoi cells to make the grid
+```{r, warning=FALSE, fig.align='center'}
+grid = make_grid(resolution = resolution,
+                 cells = vor_cells,
+                 buffers = buffers,
+                 large_buffer = large_buffer)
+
+make_leaflet_map(grid, 
+                 type = "poly")
+```
+
+

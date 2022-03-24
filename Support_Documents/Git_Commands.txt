@@ -1,0 +1,141 @@
+Commit early an often to your branches
+Branches you control should start with your initials
+For the data branch files (CSV) pull the latest one before updating it and let people know when you will be updating it. 
+Use underscores for file names and capital snake case
+Tag versions that are stabel/used
+***Look into hooks for testing
+
+##### Initial Stuff
+Set user name
+       git config --global user.name “Your Name”
+Set email
+       git config --global user.email YourName@domain.com
+Check config
+       git config --list 
+Establish a link to github
+	git remote add origin https://github.com/pndphd/cell_file_maker.git  
+Change url
+	git remote set-url origin https://github.com/pndphd/geometry_generator.git
+To avoid providing the same credentials every time, you may enable the Git credentials cache through the following command:
+	git config --global credential.helper cache
+
+##### Help
+Get help
+       git help <command>
+Second option
+       git <command> --help 
+
+##### Basic commands 
+##### (in appx. work flow order)
+Initialize a git repository
+	git init
+Check status
+	git status
+Check commits
+	git log
+Check details of commits
+       git log –stat
+See all changes
+	get reflog
+Clone a git repo
+	git clone <the_remote_repo_url> <where_to_clone>
+See info about the remote repo
+	git remote –v
+See all branches, both local and remote
+	git branch –a
+See differences
+	git diff
+Make a new branch
+	git checkout –b <branch_name>
+	git branch <branch_name>
+	(you must commit changes to a branch before it shows up)
+Check what branch
+       git branch --show-current
+Change branches 
+	git checkout <branch_name>
+Add all files to staging area
+	git add –A
+Add a file to staging area
+       git add <file_name>
+Remove all files from staging area
+	git reset
+Remove a file from staging area
+	git reset <file_name>
+Commit changes
+	git commit –m “a message about the commit”
+Push change to github
+	git push -u origin <branch_name>
+Push any desired branch to remote
+       git push -u origin <local_branch_name>:<remote_branch_name>
+After using –u the remote branch will be associated with the local so you can just do 
+	git push
+Pull from a branch
+	git pull origin <branch_name>
+Merge a branch locally (must be in folder you want to merge to)
+       git merge <branch_name> -m "message"
+Check which branches have been merged
+	git branch --merged 
+Delete a branch
+	git branch –d branch name
+Delete a remote branch
+	git push origin --delete feature/login
+
+##### Common workflow 	
+git branch <new_branch>
+git checkout <new_branch>
+(update code)
+git add –A
+git commit –m “I made these changes”
+git push –u origin <new_branch>
+git checkout master
+git pull origin master
+git merge <new_branch>
+git push origin master
+
+##### Common workflow for push to github
+git stash
+git pull
+git stash apply
+git add -A
+git commit
+git push
+
+##### Stash stuff
+Stashes carry form brach to branch. So if working in 
+Stash changes to save but no commit
+ 	git stash save “message to remind”
+See the stash
+	git stash list
+Pull back up a stash
+       git stash apply stash@{0} 
+Get rid of a stash
+	git stash drop stash@{0}
+       
+##### Fixing Shit (warning: changing history)
+Load an old file from last commit
+	git checkout <file_name>
+Change a commit message (don’t do this if the old commit has been pushed!!!)
+	git --amend -m “Updated message”
+Committed to wrong branch and need to move commit
+	git checkout <target_branch_where_u_want_commit>
+	git cherry-pick <first_7_or_8_characters_of_the_commit_hash> 
+Roll back a commit
+soft (keeps changes staged)
+	git reset --soft < first_7_or_8_characters_of_the_commit_hash_you_want_to_go_to >
+mixed (keeps changes unstaged)
+	git reset < first_7_or_8_characters_of_the_commit_hash_you_want_to_go_to>
+hard (resets everything)
+	git reset --hard < first_7_or_8_characters_of_the_commit_hash_you_want_to_go_to>
+remove and untracked files and directory
+	git clean –df
+
+##### Fix Shit (no changing history)
+Revert to an old commit with a new history
+	git revert  < first_7_or_8_characters_of_the_commit_hash_you_want_to_get_rid_of>
+
+
+
+
+
+
+
